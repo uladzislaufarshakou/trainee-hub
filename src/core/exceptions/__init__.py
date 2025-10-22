@@ -2,6 +2,7 @@
 Exceptions Package
 
 This package exposes all custom domain exceptions for the application.
+It uses ``__all__`` to define the public API.
 """
 
 from .exceptions import (
@@ -11,6 +12,8 @@ from .exceptions import (
     TechnologyNotFoundError,
     TraineeTechnologyStateNotFoundError,
     StatusUpdateNotFoundError,
+    TechnologyReviewNotFoundError,
+    CheckQuestionNotFoundError,
     BusinessRuleError,
     InvalidLearningStateTransitionError,
     TechnologyAlreadyApprovedError,
@@ -19,16 +22,18 @@ from .exceptions import (
 )
 
 __all__ = [
-    # Base classes (good for catching groups of errors)
+    # Base classes
     "DomainError",
     "NotFoundError",
     "BusinessRuleError",
-    # Specific "Not Found" errors
+    # "Not Found" errors
     "UserNotFoundError",
     "TechnologyNotFoundError",
     "TraineeTechnologyStateNotFoundError",
     "StatusUpdateNotFoundError",
-    # Specific "Business Rule" errors
+    "TechnologyReviewNotFoundError",
+    "CheckQuestionNotFoundError",
+    # "Business Rule" errors
     "InvalidLearningStateTransitionError",
     "TechnologyAlreadyApprovedError",
     "NoActiveLearningSessionError",

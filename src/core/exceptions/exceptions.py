@@ -48,6 +48,22 @@ class StatusUpdateNotFoundError(NotFoundError):
     pass
 
 
+class TechnologyReviewNotFoundError(NotFoundError):
+    """
+    Raised when a TechnologyReview (the "header" log) is not found.
+    """
+
+    pass
+
+
+class CheckQuestionNotFoundError(NotFoundError):
+    """
+    Raised when a CheckQuestion from the question bank is not found.
+    """
+
+    pass
+
+
 # --- "Business Rule" Group ---
 
 

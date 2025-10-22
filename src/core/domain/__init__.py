@@ -15,24 +15,32 @@ from .models import (
     Role,
     LearningState,
     ReviewState,
+    QuestionRating,
     User,
     LearnedTechnology,
     TraineeTechnologyState,
     LearningSessionLog,
     TechnologyReview,
+    CheckQuestion,
+    CheckQuestionResult,
     StatusUpdate,
     StatusFeedback,
 )
 
 __all__ = [
+    # Enums
     "Role",
     "LearningState",
     "ReviewState",
+    "QuestionRating",
+    # Models
     "User",
     "LearnedTechnology",
     "TraineeTechnologyState",
     "LearningSessionLog",
     "TechnologyReview",
+    "CheckQuestion",
+    "CheckQuestionResult",
     "StatusUpdate",
     "StatusFeedback",
 ]

@@ -1,32 +1,34 @@
 """
-Data Transfer Objects (DTOs) Package
+Data Transfer Objects Package
 
-This package defines the data structures used for communication
-between the Presentation layer (API) and the Application
-Service layer (Use Cases).
+This package defines the public API for all DTOs
+used by the Application Service layer.
 
-DTOs define the "shape" of data for inputs (e.g., `...CreateDTO`)
-and outputs (e.g., `...DTO`) of our business logic.
+It imports all DTO classes from their respective modules
+and exposes them here, controlling the public API
+via the ``__all__`` list.
 """
 
+# Imports from user_dto.py
 from .user_dto import (
     AuthRequestDTO,
     AuthResponseDTO,
     UserDTO,
 )
+
+# Imports from technology_dto.py
 from .technology_dto import (
     TechnologyDTO,
-    AdminTechnologyCreateDTO,
 )
+
+# Imports from trainee_dto.py
 from .trainee_dto import (
     TraineeStartLearningDTO,
     TraineeMarkReadyDTO,
     TraineeTechnologyStateDTO,
 )
-from .mentor_dto import (
-    MentorScheduleReviewDTO,
-    MentorSubmitReviewDTO,
-)
+
+# Imports from status_dto.py
 from .status_dto import (
     WebhookStatusUpdateDTO,
     MentorStatusFeedbackDTO,
@@ -34,21 +36,40 @@ from .status_dto import (
     StatusUpdateDTO,
 )
 
+# Imports from check_dto.py (the new file)
+from .check_dto import (
+    CreateCheckQuestionDTO,
+    UpdateCheckQuestionDTO,
+    CheckQuestionDTO,
+    CheckQuestionResultInputDTO,
+)
+
+# Imports from mentor_dto.py
+from .mentor_dto import (
+    MentorSubmitReviewDTO,
+)
+
+
+# --- Public API Definition ---
+
 __all__ = [
-    # User & Auth
+    # Auth & User
     "AuthRequestDTO",
     "AuthResponseDTO",
     "UserDTO",
     # Technology
     "TechnologyDTO",
-    "AdminTechnologyCreateDTO",
-    # Trainee
+    # Trainee Actions
     "TraineeStartLearningDTO",
     "TraineeMarkReadyDTO",
     "TraineeTechnologyStateDTO",
-    # Mentor
-    "MentorScheduleReviewDTO",
+    # Mentor Actions
     "MentorSubmitReviewDTO",
+    # Check System
+    "CreateCheckQuestionDTO",
+    "UpdateCheckQuestionDTO",
+    "CheckQuestionDTO",
+    "CheckQuestionResultInputDTO",
     # Status & Feedback
     "WebhookStatusUpdateDTO",
     "MentorStatusFeedbackDTO",
