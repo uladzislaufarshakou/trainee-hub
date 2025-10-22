@@ -1,10 +1,8 @@
 from uuid import UUID, uuid4
 from datetime import datetime, timezone
 
-# --- 1. Imports from src.core.domain ---
 from src.core.domain import TraineeTechnologyState, LearningSessionLog, LearningState
 
-# --- 2. Imports from src.core.exceptions ---
 from src.core.exceptions import (
     TraineeTechnologyStateNotFoundError,
     LearningSessionAlreadyInProgressError,
@@ -12,7 +10,6 @@ from src.core.exceptions import (
     NoActiveLearningSessionError,
 )
 
-# --- 3. Imports from src.application.repositories ---
 from src.application.repositories import (
     ITraineeTechnologyStateRepository,
     ILearningSessionLogRepository,
