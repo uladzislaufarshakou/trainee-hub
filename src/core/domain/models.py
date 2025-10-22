@@ -1,4 +1,16 @@
-# src/core/domain/models.py
+"""
+Core Domain Models
+
+This module defines all core business entities (domain models) for the
+mentorship application.
+
+These models are implemented as Pydantic `BaseModel` classes and are
+configured to be immutable via ``IMMUTABLE_CONFIG``.
+
+They represent the pure, canonical "language" of the business and are
+intentionally decoupled from any database (e.g., SQLAlchemy)
+or API (e.g., DTOs) implementation details.
+"""
 
 from __future__ import annotations
 from datetime import datetime
