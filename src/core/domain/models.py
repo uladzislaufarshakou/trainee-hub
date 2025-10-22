@@ -43,8 +43,7 @@ class Role(str, Enum):
 class LearningState(str, Enum):
     """
     Describes the *current* state of a Trainee's progress
-    on a *single* technology. This is the core of the
-    learning tracking system.
+    on a *single* technology.
     """
 
     PLANNED = "planned"
@@ -57,12 +56,22 @@ class LearningState(str, Enum):
 
 class ReviewState(str, Enum):
     """
-    Describes the *result* of a single review event.
-    Used by the `TechnologyReview` log.
+    Describes the *overall result* of a single review event.
     """
 
     APPROVED = "approved"
     REJECTED = "rejected"
+
+
+class QuestionRating(str, Enum):
+    """
+    NEW ENUM
+    Describes the rating for a *single question* during a check.
+    """
+
+    CORRECT = "correct"  #: (+)
+    PARTIAL = "partial"  #: (+-)
+    INCORRECT = "incorrect"  #: (-)
 
 
 # --- Core Domain Models ---
@@ -71,8 +80,6 @@ class ReviewState(str, Enum):
 class User(BaseModel):
     """
     Represents a canonical User in the system.
-    A User's capabilities are defined by their `role`.
-    Both Trainees and Mentors are Users.
 
     :param id: Unique identifier for the user.
     :param email: Primary identifier from Gmail.
@@ -99,8 +106,6 @@ class User(BaseModel):
 class LearnedTechnology(BaseModel):
     """
     Represents a canonical "tag" for a skill or technology.
-    This is the global "library" of all technologies
-    a trainee can choose to learn.
 
     :param id: Unique identifier for the technology.
     :param name: Normalized name (e.g., "python", "fastapi").
@@ -115,8 +120,6 @@ class LearnedTechnology(BaseModel):
 class TraineeTechnologyState(BaseModel):
     """
     Represents the *current state* of a Trainee learning a Technology.
-    This is the "task card" for a specific learning goal.
-    It no longer contains history, only the *current* status.
 
     :param id: Unique identifier for this state entry.
     :param trainee_id: The ID of the `User` (Trainee).
@@ -130,11 +133,9 @@ class TraineeTechnologyState(BaseModel):
     model_config = IMMUTABLE_CONFIG
 
     id: UUID
-
     trainee_id: UUID
     technology_id: UUID
     mentor_id: UUID
-
     state: LearningState
     added_at: datetime
     scheduled_review_at: datetime | None = None
@@ -143,13 +144,6 @@ class TraineeTechnologyState(BaseModel):
 class LearningSessionLog(BaseModel):
     """
     Logs a *single continuous period* of work in the 'IN_PROGRESS' state.
-
-    A new record is created when state changes to 'IN_PROGRESS'.
-    The active log is updated with an `end_time` when the state
-    changes away from 'IN_PROGRESS'.
-
-    Total learning time = SUM(end_time - start_time) for all
-    logs linked to a TraineeTechnologyState.
 
     :param id: Unique identifier for the log entry.
     :param trainee_technology_state_id: Links to the "task card" this session belongs to.
@@ -167,19 +161,22 @@ class LearningSessionLog(BaseModel):
 
 class TechnologyReview(BaseModel):
     """
+    MODIFIED MODEL
     A "log entry" representing one review attempt (a "check").
 
-    This creates a full history of all review cycles,
-    including all rejections ("failed checks") and feedback.
+    This is now a "header" for a collection of CheckQuestionResult items.
+    The `feedback` field is the *overall summary* of the check.
+
+    `questions_asked` and `questions_correct` are REMOVED, as they
+    will be calculated by the ApplicationService from the associated
+    `CheckQuestionResult` entries.
 
     :param id: Unique identifier for the review.
     :param trainee_technology_state_id: Links to the "task card" this review is for.
     :param mentor_id: The ID of the `User` (Mentor) who conducted the review.
-    :param review_state: The outcome of the review (APPROVED or REJECTED).
-    :param feedback: The mentor's textual comments for this review.
+    :param review_state: The *overall* outcome of the review (APPROVED or REJECTED).
+    :param feedback: The mentor's *overall summary* comments for this review.
     :param created_at: Timestamp when the review was submitted.
-    :param questions_asked: Optional: number of questions asked during the review.
-    :param questions_correct: Optional: number of questions answered correctly.
     """
 
     model_config = IMMUTABLE_CONFIG
@@ -190,14 +187,56 @@ class TechnologyReview(BaseModel):
     review_state: ReviewState
     feedback: str
     created_at: datetime
-    questions_asked: int | None = None
-    questions_correct: int | None = None
+
+
+class CheckQuestion(BaseModel):
+    """
+    NEW MODEL
+    Represents a single question in the "Question Bank".
+    Each question is tied to a specific technology.
+
+    :param id: Unique identifier for the question.
+    :param technology_id: Links to the `LearnedTechnology` this question is about.
+    :param question_text: The text of the question (e.g., "What is the GIL?").
+    :param is_active: Allows mentors to "delete" (archive) questions without breaking history.
+    :param created_by_mentor_id: The ID of the `User` (Mentor) who added this question.
+    """
+
+    model_config = IMMUTABLE_CONFIG
+
+    id: UUID
+    technology_id: UUID
+    question_text: str
+    is_active: bool = True
+    created_at: datetime
+    created_by_mentor_id: UUID
+
+
+class CheckQuestionResult(BaseModel):
+    """
+    NEW MODEL
+    Represents the result of a *single question* during a *single review*.
+    This is the log of `+`, `-`, or `+-`.
+
+    :param id: Unique identifier for this result.
+    :param technology_review_id: Links to the specific `TechnologyReview` (check) this was part of.
+    :param check_question_id: Links to the `CheckQuestion` that was asked.
+    :param rating: The rating given by the mentor (`correct`, `partial`, `incorrect`).
+    :param mentor_comment: (Optional) A specific note for this answer (e.g., "Confused X with Y").
+    """
+
+    model_config = IMMUTABLE_CONFIG
+
+    id: UUID
+    technology_review_id: UUID
+    check_question_id: UUID
+    rating: QuestionRating
+    mentor_comment: str | None = None
 
 
 class StatusUpdate(BaseModel):
     """
     Represents a daily status log submitted by a Trainee.
-    This is the "raw input" from Google Chat.
 
     :param id: Unique identifier for the status update.
     :param trainee_id: The ID of the `User` (Trainee) who submitted.
@@ -225,9 +264,6 @@ class StatusFeedback(BaseModel):
     """
     Represents a Mentor's comment on a *specific* daily `StatusUpdate`.
 
-    .. note::
-       This is different from `TechnologyReview.feedback`,
-       which is feedback on a final technology check.
 
     :param id: Unique identifier for the feedback.
     :param status_update_id: Links to the daily `StatusUpdate`.
