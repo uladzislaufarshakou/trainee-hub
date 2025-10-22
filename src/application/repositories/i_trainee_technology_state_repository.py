@@ -29,6 +29,20 @@ class ITraineeTechnologyStateRepository(ABC):
         ...
 
     @abstractmethod
+    async def find_by_trainee_and_technology(
+        self, trainee_id: UUID, technology_id: UUID
+    ) -> TraineeTechnologyState | None:
+        """
+        Finds a technology state "task card" by its business key
+        (trainee + technology).
+
+        :param trainee_id: The `User` ID of the trainee.
+        :param technology_id: The `LearnedTechnology` ID.
+        :return: The `TraineeTechnologyState` model or None if not found.
+        """
+        ...
+
+    @abstractmethod
     async def add(self, state: TraineeTechnologyState) -> None:
         """
         Adds a new `TraineeTechnologyState` to the repository.

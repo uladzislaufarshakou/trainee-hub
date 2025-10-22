@@ -9,7 +9,9 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from src.core.domain import LearningSessionLog
-from src.core.exceptions import NoActiveLearningSessionError
+# NoActiveLearningSessionError убрано из импортов,
+# т.к. репозиторий не должен принимать решения, он должен
+# сообщать о фактах (т.е. возвращать None).
 
 
 class ILearningSessionLogRepository(ABC):
@@ -27,14 +29,19 @@ class ILearningSessionLogRepository(ABC):
         ...
 
     @abstractmethod
-    async def get_active_session(self, state_id: UUID) -> LearningSessionLog:
+    async def find_active_session_by_trainee_id(
+        self, trainee_id: UUID
+    ) -> LearningSessionLog | None:
         """
-        Gets the currently active (end_time=None) session for
-        a specific technology state "task card".
+        Finds the currently active (end_time=None) session for
+        a specific trainee.
 
-        :param state_id: The `TraineeTechnologyState` ID.
-        :raises NoActiveLearningSessionError: If no active session is found.
-        :return: The `LearningSessionLog` domain model.
+        This enforces the business rule that a trainee can only
+        have one active session at a time.
+
+        :param trainee_id: The `User` ID of the trainee.
+        :return: The `LearningSessionLog` model or None if no
+                 active session is found.
         """
         ...
 
